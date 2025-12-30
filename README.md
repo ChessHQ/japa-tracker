@@ -1,4 +1,4 @@
-# Welcome to Japa Tracker 👋
+# Welcome to Japa Tracker📿
 
 Through this app you can keep track of your japa meditation.
 
