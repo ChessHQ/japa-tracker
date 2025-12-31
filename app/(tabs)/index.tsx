@@ -14,14 +14,21 @@ export default function HomeScreen() {
   // const [variable, function-that-sets-variable-when-u-want-to-update-it] = useState<type>(default-value)
   const [currentBead, setCurrentBead] = useState<number>(0) // react state hooks
   const [roundCompleted, setRoundCompleted] = useState<boolean>(false)
+  const [currentRound, setCurrentRound] = useState<number>(0)
 
   const handleBeadClick = () => {
     setCurrentBead(currentBead + 1)
   }
 
+  const handleReset = () => {
+    setCurrentBead(0)
+    setRoundCompleted(false)
+  }
+
   useEffect(() => {
     if (currentBead === 8) {
       setRoundCompleted(true)
+      setCurrentRound(prev => prev + 1)
     }
   }, [currentBead, /*other dependency vars*/])
 
@@ -38,7 +45,9 @@ export default function HomeScreen() {
       <ThemedView style={styles.stepContainer}>
         <ThemedText type="subtitle">Japa Counter</ThemedText>
         <ThemedText type="default">Current Bead: {currentBead}</ThemedText>
+        <ThemedText type="default">Rounds Completed: {currentRound}</ThemedText>
         <button disabled = {roundCompleted} onClick={handleBeadClick}>Click</button>
+        <button onClick={handleReset}>Start New Round</button>
       </ThemedView>
       <ThemedView style={styles.stepContainer}>
         <Link href="/modal">
