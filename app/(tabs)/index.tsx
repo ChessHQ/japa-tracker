@@ -5,8 +5,26 @@ import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Link } from 'expo-router';
+import { useEffect, useState } from 'react';
 
 export default function HomeScreen() {
+  // useState and useEffect
+
+  // state:
+  // const [variable, function-that-sets-variable-when-u-want-to-update-it] = useState<type>(default-value)
+  const [currentBead, setCurrentBead] = useState<number>(0) // react state hooks
+  const [roundCompleted, setRoundCompleted] = useState<boolean>(false)
+
+  const handleBeadClick = () => {
+    setCurrentBead(currentBead + 1)
+  }
+
+  useEffect(() => {
+    if (currentBead === 8) {
+      setRoundCompleted(true)
+    }
+  }, [currentBead, /*other dependency vars*/])
+
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#0a8031ff', dark: '#0a8031ff' }}
@@ -19,18 +37,8 @@ export default function HomeScreen() {
       </ThemedView>
       <ThemedView style={styles.stepContainer}>
         <ThemedText type="subtitle">Japa Counter</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
+        <ThemedText type="default">Current Bead: {currentBead}</ThemedText>
+        <button disabled = {roundCompleted} onClick={handleBeadClick}>Click</button>
       </ThemedView>
       <ThemedView style={styles.stepContainer}>
         <Link href="/modal">
