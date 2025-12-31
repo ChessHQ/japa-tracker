@@ -38,7 +38,7 @@ export default function HomeScreen() {
       <ThemedView style={styles.stepContainer}>
         <ThemedText type="subtitle">Japa Counter</ThemedText>
         <ThemedText type="default">Current Bead: {currentBead}</ThemedText>
-        <button disabled = {roundCompleted} onClick={handleBeadClick}>Click</button>
+        <button disabled = {roundCompleted} style={styles.button} onClick={handleBeadClick}>Chant</button>
       </ThemedView>
     </ParallaxScrollView>
   );
@@ -65,4 +65,10 @@ const styles = StyleSheet.create({
     left: 0,
     position: 'absolute',
   },
+  button: {
+    height: 50,
+    width: 250,
+    bottom: -300,
+    left: 0,
+  }
 });
