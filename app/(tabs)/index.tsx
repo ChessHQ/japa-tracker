@@ -1,93 +1,164 @@
-import { Image } from "expo-image";
-import { Platform, StyleSheet } from "react-native";
-
+import { getUserData, createUserAccount, userLogin } from "@/api/db_queries";
 import ParallaxScrollView from "@/components/parallax-scroll-view";
 import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
-import { Link } from "expo-router";
+import { Button } from "@react-navigation/elements";
+import { ThemeProvider, useRoutePath } from "@react-navigation/native";
+import { Image } from "expo-image";
 import { useEffect, useState } from "react";
+import { StyleSheet, View } from "react-native";
 
 export default function HomeScreen() {
-  // useState and useEffect
+  enum formState {
+    LOGIN,
+    SIGNUP,
+  }
 
-  // state:
-  // const [variable, function-that-sets-variable-when-u-want-to-update-it] = useState<type>(default-value)
-  const [currentBead, setCurrentBead] = useState<number>(0); // react state hooks
-  const [roundCompleted, setRoundCompleted] = useState<boolean>(false);
-  const [currentRound, setCurrentRound] = useState<number>(0);
+  // Current page - either login or create new account
+  const [page, setPage] = useState<formState>(formState.LOGIN);
+  // Current user
+  const [currentUser, setCurrentUser] = useState<string | undefined>(undefined);
+  // for testing purposes
+  const [userData, setUserData] = useState<string>();
+  // Username and pwd
+  const [username, setUserName] = useState<string>();
+  const [password, setPassword] = useState<string>();
 
-  const handleBeadClick = () => {
-    setCurrentBead(currentBead + 1);
+  // For messages to user
+  const [showLoginError, setShowLoginError] = useState<boolean>();
+  const [showLoginConfirmation, setShowLoginConfirmation] = useState<boolean>();
+
+  const useUserData = async () => {
+    const data = await getUserData();
+    setUserData(data);
   };
 
-  const handleReset = () => {
-    setCurrentBead(0);
-    setRoundCompleted(false);
+  const handleSubmitNewAccount = async () => {
+    if (username && password) {
+      createUserAccount(username, password);
+      setUserName("");
+      setPassword("");
+      setShowLoginError(false);
+      setShowLoginConfirmation(true);
+    } else {
+      setShowLoginError(true);
+    }
+  };
+
+  const handleUserLogin = async () => {
+    if (username && password) {
+      userLogin(username, password);
+      setUserName("");
+      setPassword("");
+      console.log("current user should be set to: ", username);
+      setCurrentUser(username);
+      setShowLoginConfirmation(true);
+    }
+  };
+
+  const handleCreateAccountPage = () => {
+    setPage(formState.SIGNUP);
+  };
+
+  const handleLoginPage = () => {
+    setPage(formState.LOGIN);
   };
 
   useEffect(() => {
-    if (currentBead === 8) {
-      setRoundCompleted(true);
-      setCurrentRound((prev) => prev + 1);
-    }
-  }, [currentBead /*other dependency vars*/]);
+    useUserData();
+  }, [getUserData]);
 
-  return (
+  const userProfile = () => {
+    const profileButton = currentUser ? (
+      <button>{currentUser}</button>
+    ) : (
+      <button onClick={handleLoginPage}>Login</button>
+    );
+    return profileButton;
+  };
+
+  return page === formState.LOGIN ? (
     <ParallaxScrollView
       headerBackgroundColor={{ light: "#0a8031ff", dark: "#0a8031ff" }}
       headerImage={<Image></Image>}
     >
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Start chanting your rounds!</ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Japa Counter</ThemedText>
-        <ThemedText type="default">Current Bead: {currentBead}</ThemedText>
-        <ThemedText type="default">Current Round: {currentRound}</ThemedText>
-        <button
-          disabled={roundCompleted}
-          style={styles.button}
-          onClick={handleBeadClick}
-        >
-          Chant
+      {userProfile()}
+      <ThemedText type="title">Login</ThemedText>
+      <View style={styles.flexContainer}>
+        <input
+          style={styles.inputField}
+          placeholder="username"
+          onChange={(e) => setUserName(e.target.value)}
+          value={username}
+        ></input>
+        <input
+          style={styles.inputField}
+          placeholder="password"
+          type="password"
+          onChange={(e) => setPassword(e.target.value)}
+          value={password}
+        ></input>
+      </View>
+      <button onClick={handleUserLogin} style={styles.button}>
+        Login
+      </button>
+      <button onClick={handleCreateAccountPage} style={styles.button}>
+        I don't have an account
+      </button>
+    </ParallaxScrollView>
+  ) : (
+    <ParallaxScrollView
+      headerBackgroundColor={{ light: "#0a8031ff", dark: "#0a8031ff" }}
+      headerImage={<Image></Image>}
+    >
+      {userProfile()}
+      <ThemedText type="title">Create Account</ThemedText>
+      <View style={styles.flexContainer}>
+        <input
+          style={styles.inputField}
+          placeholder="enter new username"
+          onChange={(e) => setUserName(e.target.value)}
+          value={username}
+        ></input>
+        <input
+          style={styles.inputField}
+          placeholder="enter new password"
+          type="password"
+          onChange={(e) => setPassword(e.target.value)}
+          value={password}
+        ></input>
+        {showLoginError && (
+          <text style={styles.loginMessage}>
+            User must provide both username and password
+          </text>
+        )}
+        {showLoginConfirmation && (
+          <text style={styles.loginMessage}>Account created!</text>
+        )}
+        <button onClick={handleSubmitNewAccount} style={styles.button}>
+          Submit
         </button>
-        <button
-          disabled={!roundCompleted}
-          style={styles.button}
-          onClick={handleReset}
-        >
-          Start a new round
-        </button>
-      </ThemedView>
+      </View>
+      <button onClick={handleLoginPage} style={styles.button}>
+        Login
+      </button>
     </ParallaxScrollView>
   );
 }
 
-// 2 types of variables:
-// const - can't be changed
-// let - can be changed
-
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: "absolute",
-  },
   button: {
-    height: 50,
-    width: 250,
-    bottom: -300,
-    left: 0,
+    marginTop: 20,
+    width: 100,
+    height: 40,
+  },
+  inputField: {
+    width: 200,
+    fontSize: 18,
+  },
+  flexContainer: {
+    flex: 1,
+  },
+  loginMessage: {
+    color: "white",
   },
 });
