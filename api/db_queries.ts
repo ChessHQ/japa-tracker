@@ -1,7 +1,5 @@
 import { db_client as db } from "./db_connection";
 
-type UserRecord = String[];
-
 /**
  * Here's my understanding of how these work. So when you query supabase, it will return
  * a PostGreSQL response containing the following: count, data, error, etc.
@@ -13,23 +11,30 @@ type UserRecord = String[];
 export async function getUserData(): Promise<string> {
   const { data, error } = await db.from("Users").select();
   if (error) throw error;
-  console.log(data[0].id);
+  console.log(data[0]);
+  console.log(data[1]);
   return data[0].id;
 }
 
+/**
+ * Creates a user account, sending username and password params to the DB. Throws error if
+ * @param username
+ * @param password
+ */
 export async function createUserAccount(
   username: string,
-  password: string
+  password: string,
 ): Promise<void> {
   const { error } = await db.from("Users").insert({
     username: username,
     password: password,
   });
+  if (error) throw Error("Couldn't create account");
 }
 
 export async function userLogin(
   username: string,
-  password: string
+  password: string,
 ): Promise<void> {
   const { data, error } = await db
     .from("Users")
